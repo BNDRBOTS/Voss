@@ -38,6 +38,11 @@
             box-sizing: border-box;
         }
 
+        html {
+            background-color: var(--void);
+            overscroll-behavior: none; 
+        }
+
         html.lenis {
             height: auto;
         }
@@ -47,24 +52,15 @@
         }
 
         body {
-            background-color: var(--void);
+            background-color: transparent; /* Changed to transparent so body doesn't block canvas */
             color: var(--bone);
             font-family: var(--font-body);
             overflow-x: hidden;
             -webkit-font-smoothing: antialiased;
-            cursor: none; 
+            cursor: auto; 
         }
 
-        /* LAYERS (Z-INDEX LOGIC)
-           -10: WebGL / Void
-           -1:  Images
-           1:   Content Wrapper
-           20:  Nav / HUD
-           50:  Interactions (Buttons)
-           9999: Cursor
-        */
-
-        /* CUSTOM CURSOR */
+        /* CUSTOM CURSOR (Fixed - Outside Wrapper) */
         #cursor {
             position: fixed;
             top: 0;
@@ -80,14 +76,16 @@
             transition: width 0.3s, height 0.3s;
         }
 
-        /* WEBGL CANVAS */
+        /* WEBGL CANVAS (Fixed - Outside Wrapper) 
+           Z-INDEX FIX: Moved to 0 to sit ON TOP of html background but BEHIND wrapper
+        */
         #webgl-canvas {
             position: fixed;
             top: 0;
             left: 0;
             width: 100vw;
             height: 100vh;
-            z-index: -10;
+            z-index: 0; /* Was -10, caused visibility issue */
             opacity: 0.6; 
         }
 
@@ -131,17 +129,7 @@
             transform: translateY(0);
         }
 
-        /* LAYOUT ARCHITECTURE */
-        .wrapper {
-            position: relative;
-            z-index: 1;
-            padding: 4rem;
-            will-change: transform; /* Performance Hint for Torque Effect */
-            transform-origin: center center;
-            padding-bottom: 0; /* Let footer handle spacing */
-        }
-
-        /* VERTICAL HEADLINE */
+        /* VERTICAL HEADLINE (Fixed - SIBLING of wrapper) */
         .vertical-nav {
             position: fixed;
             left: 3rem;
@@ -161,112 +149,7 @@
             opacity: 0.9;
         }
 
-        /* SECTIONS */
-        section {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            position: relative;
-            padding-left: 15vw; 
-        }
-
-        .content-block {
-            position: relative;
-        }
-
-        .content-block.right {
-            margin-left: auto;
-            margin-right: 5vw;
-            text-align: right;
-        }
-        
-        .content-block.right p {
-            margin-left: auto;
-        }
-
-        /* IMAGES & OVERLAPS */
-        .img-container {
-            position: absolute;
-            z-index: -1;
-            filter: grayscale(100%) contrast(120%);
-            opacity: 0.6;
-            transition: transform 0.1s linear;
-            /* CRITICAL FIX: Prevents alt text leakage */
-            font-size: 0; 
-            line-height: 0;
-            color: transparent; /* Extra safety for mobile text flash */
-            user-select: none;
-            overflow: hidden; 
-        }
-        
-        .img-container img {
-            width: 100%;
-            height: auto;
-            display: block;
-        }
-
-        .img-1 {
-            top: -20%;
-            right: -10%;
-            width: 40vw;
-            mix-blend-mode: lighten;
-        }
-
-        .img-2 {
-            bottom: -10%;
-            left: -20%;
-            width: 35vw;
-            mix-blend-mode: exclusion;
-        }
-
-        /* FOOTER */
-        .site-footer {
-            margin-top: 10vh;
-            padding: 3rem 0 2rem 15vw; /* Match section padding */
-            border-top: 1px solid rgba(232, 230, 225, 0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-            font-family: var(--font-body);
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.15em;
-            color: rgba(232, 230, 225, 0.4);
-        }
-
-        .footer-links {
-            display: flex;
-            gap: 2rem;
-        }
-
-        .footer-links a {
-            color: inherit;
-            text-decoration: none;
-            position: relative;
-            transition: color 0.3s ease;
-        }
-
-        .footer-links a::after {
-            content: '';
-            position: absolute;
-            bottom: -4px;
-            left: 0;
-            width: 0;
-            height: 1px;
-            background: var(--copper);
-            transition: width 0.3s ease;
-        }
-
-        .footer-links a:hover {
-            color: var(--copper);
-        }
-
-        .footer-links a:hover::after {
-            width: 100%;
-        }
-
-
-        /* MAGNETIC ORB CTA */
+        /* MAGNETIC ORB CTA (Fixed - SIBLING of wrapper) */
         .magnetic-wrap {
             position: fixed;
             bottom: 3rem;
@@ -329,7 +212,6 @@
             letter-spacing: 0.1em;
         }
 
-        /* Hover State for Orb */
         .magnetic-wrap:hover .orb-cta {
             width: 300px;
             height: 60px;
@@ -346,17 +228,127 @@
             transform: translateY(0);
         }
 
+        /* LAYOUT ARCHITECTURE (The Physics Container) */
+        .wrapper {
+            position: relative;
+            z-index: 2; /* Lifted to 2 to stay above Canvas (0) */
+            padding: 4rem;
+            will-change: transform;
+            transform-origin: center center;
+            padding-bottom: 0; 
+            min-height: 101vh; 
+        }
+
+        /* SECTIONS */
+        section {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            position: relative;
+            padding-left: 15vw; 
+        }
+
+        .content-block {
+            position: relative;
+        }
+
+        .content-block.right {
+            margin-left: auto;
+            margin-right: 5vw;
+            text-align: right;
+        }
+        
+        .content-block.right p {
+            margin-left: auto;
+        }
+
+        /* IMAGES & OVERLAPS */
+        .img-container {
+            position: absolute;
+            z-index: -1;
+            filter: grayscale(100%) contrast(120%);
+            opacity: 0.6;
+            transition: transform 0.1s linear;
+            font-size: 0; 
+            line-height: 0;
+            color: transparent; 
+            user-select: none;
+            overflow: hidden; 
+        }
+        
+        .img-container img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .img-1 {
+            top: -20%;
+            right: -10%;
+            width: 40vw;
+            mix-blend-mode: lighten;
+        }
+
+        .img-2 {
+            bottom: -10%;
+            left: -20%;
+            width: 35vw;
+            mix-blend-mode: exclusion;
+        }
+
+        /* FOOTER */
+        .site-footer {
+            margin-top: 10vh;
+            padding: 3rem 0 2rem 15vw;
+            border-top: 1px solid rgba(232, 230, 225, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            font-family: var(--font-body);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: rgba(232, 230, 225, 0.4);
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .footer-links a {
+            color: inherit;
+            text-decoration: none;
+            position: relative;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background: var(--copper);
+            transition: width 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--copper);
+        }
+
+        .footer-links a:hover::after {
+            width: 100%;
+        }
+
         /* MOBILE ADJUSTMENTS */
         @media (max-width: 768px) {
-            body { cursor: auto !important; }
             #cursor { display: none !important; }
-            
-            /* Performance: Remove heavy filters on mobile */
             .img-container { 
                 filter: none !important; 
                 opacity: 0.8; 
             }
-
             .vertical-nav { display: none; }
             section { padding-left: 0; justify-content: center; }
             .content-block { width: 100%; }
@@ -366,26 +358,40 @@
                 flex-direction: column-reverse;
                 align-items: center;
                 gap: 1.5rem;
-                padding-bottom: 8rem; /* Space for magnetic btn */
+                padding-bottom: 8rem;
                 text-align: center;
+            }
+            .wrapper {
+                padding: 4rem 1.5rem;
+                overflow-x: hidden;
             }
         }
     </style>
 </head>
 <body>
 
-    <!-- CUSTOM CURSOR -->
+    <!-- 1. CUSTOM CURSOR (Fixed - Sibling 1) -->
     <div id="cursor"></div>
 
-    <!-- WEBGL BACKGROUND -->
+    <!-- 2. WEBGL BACKGROUND (Fixed - Sibling 2) -->
     <canvas id="webgl-canvas"></canvas>
 
-    <!-- FIXED VERTICAL NAV -->
+    <!-- 3. FIXED VERTICAL NAV (Fixed - Sibling 3 - OUTSIDE WRAPPER) -->
     <nav class="vertical-nav">
         <h1>Valentina Voss</h1>
     </nav>
+    
+    <!-- 4. MAGNETIC CTA (Fixed - Sibling 4 - OUTSIDE WRAPPER) -->
+    <div class="magnetic-wrap" id="magnetic-btn">
+        <div class="orb-cta">
+            <span class="orb-text">VOSS</span>
+            <form class="orb-form" onsubmit="event.preventDefault();">
+                <input type="email" class="orb-input" placeholder="ACCESS CODE / EMAIL" required>
+            </form>
+        </div>
+    </div>
 
-    <!-- MAIN CONTENT WRAPPER -->
+    <!-- 5. MAIN CONTENT WRAPPER (Relative - Sibling 5 - RECEIVES TORQUE) -->
     <main class="wrapper">
         
         <!-- SECTION 1: ARCHITECTURE -->
@@ -467,16 +473,6 @@
 
     </main>
 
-    <!-- MAGNETIC CTA -->
-    <div class="magnetic-wrap" id="magnetic-btn">
-        <div class="orb-cta">
-            <span class="orb-text">VOSS</span>
-            <form class="orb-form" onsubmit="event.preventDefault();">
-                <input type="email" class="orb-input" placeholder="ACCESS CODE / EMAIL" required>
-            </form>
-        </div>
-    </div>
-
     <!-- SCRIPTS -->
     <script src="https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js"></script>
     <script src="https://unpkg.com/gsap@3.12.2/dist/gsap.min.js"></script>
@@ -488,48 +484,38 @@
         const isMobile = window.innerWidth < 768;
 
         // --- 1. LENIS SMOOTH SCROLL & TORQUE PHYSICS ---
-        let lenis;
-        
-        // Disable Lenis on Mobile to preserve native scroll inertia
-        if (!isMobile) {
-            lenis = new Lenis({
-                duration: 1.2,
-                easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-                direction: 'vertical',
-                gestureDirection: 'vertical',
-                smooth: true,
-                mouseMultiplier: 1,
-                smoothTouch: false,
-                touchMultiplier: 2,
-                lerp: 0.05
-            });
-        }
+        const lenis = new Lenis({
+            duration: 1.2,
+            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+            direction: 'vertical',
+            gestureDirection: 'vertical',
+            smooth: true,
+            mouseMultiplier: 1,
+            smoothTouch: true, 
+            touchMultiplier: 1.5,
+            lerp: 0.05
+        });
 
         // TORQUE VARIABLES
         let currentSkew = 0;
         const wrapper = document.querySelector('.wrapper');
-        const skewStrength = 0.15; 
-        const skewDamping = 0.1;   
+        const skewStrength = isMobile ? 0.05 : 0.15; 
+        const skewDamping = 0.1;
+        const maxSkew = isMobile ? 2 : 5;   
 
         function raf(time) {
-            if (lenis) {
-                lenis.raf(time);
-                
-                // TORQUE LOGIC: Only run on desktop
-                if (wrapper) {
-                    let targetSkew = lenis.velocity * skewStrength;
-                    targetSkew = Math.min(Math.max(targetSkew, -5), 5);
-                    currentSkew += (targetSkew - currentSkew) * skewDamping;
-                    wrapper.style.transform = `skewY(${currentSkew}deg)`;
-                }
+            lenis.raf(time);
+            
+            // TORQUE LOGIC
+            if (wrapper) {
+                let targetSkew = lenis.velocity * skewStrength;
+                targetSkew = Math.min(Math.max(targetSkew, -maxSkew), maxSkew);
+                currentSkew += (targetSkew - currentSkew) * skewDamping;
+                wrapper.style.transform = `skewY(${currentSkew}deg)`;
             }
             requestAnimationFrame(raf);
         }
-        
-        // Start RAF only if we need it (Desktop)
-        if (!isMobile) {
-            requestAnimationFrame(raf);
-        }
+        requestAnimationFrame(raf);
 
 
         // --- 2. GSAP REVEALS & PARALLAX ---
@@ -561,7 +547,6 @@
 
 
         // --- 3. MAGNETIC BUTTON & CURSOR ---
-        // Only initialize Custom Cursor Logic on Desktop
         const magBtn = document.getElementById('magnetic-btn');
 
         if (!isMobile) {
@@ -624,7 +609,7 @@
         camera.position.y = 1;
         camera.rotation.x = -0.5;
 
-        // OPTIMIZATION: Cap Pixel Ratio at 1 for Mobile to prevent throttling
+        // OPTIMIZATION: Cap Pixel Ratio at 1 for Mobile
         const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: !isMobile });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(isMobile ? 1 : Math.min(window.devicePixelRatio, 2));
@@ -703,8 +688,9 @@
         `;
 
         // OPTIMIZATION: Reduce segments significantly on mobile (128 -> 32)
+        // INCREASED SIZE to 14x14 to ensure no black gaps on ultrawide
         const segmentCount = isMobile ? 32 : 128;
-        const geometry = new THREE.PlaneGeometry(6, 4, segmentCount, segmentCount);
+        const geometry = new THREE.PlaneGeometry(14, 14, segmentCount, segmentCount);
         
         const material = new THREE.ShaderMaterial({
             vertexShader,
@@ -737,7 +723,6 @@
         animate();
 
         window.addEventListener('resize', () => {
-            // Re-check mobile state on resize (e.g. tablet rotation)
             const newIsMobile = window.innerWidth < 768;
             
             camera.aspect = window.innerWidth / window.innerHeight;
