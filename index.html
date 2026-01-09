@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VALENTINA VOSS | BIOLOGICAL RENOVATION</title>
+    
+    <!-- FONTS -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Space+Grotesk:wght@300;500&display=swap" rel="stylesheet">
+
+    <!-- STYLES -->
+    <style>
+        :root {
+            --void: #0F0E0E;
+            --copper: #C17C5C;
+            --bone: #E8E6E1;
+            --agave: #353932;
+            --font-head: 'Cinzel', serif;
+            --font-body: 'Space Grotesk', sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html.lenis {
+            height: auto;
+        }
+
+        .lenis.lenis-smooth {
+            scroll-behavior: auto;
+        }
+
+        body {
+            background-color: var(--void);
+            color: var(--bone);
+            font-family: var(--font-body);
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            cursor: none; /* Custom cursor handling */
+        }
+
+        /* CUSTOM CURSOR */
+        #cursor {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 12px;
+            height: 12px;
+            background: var(--copper);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            mix-blend-mode: difference;
+            transition: width 0.3s, height 0.3s;
+        }
+
+        /* WEBGL CANVAS */
+        #webgl-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            opacity: 0.6; /* Slight fade to let text pop */
+        }
+
+        /* TYPOGRAPHY UTILS */
+        .h-sub {
+            font-family: var(--font-body);
+            font-size: 0.85rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--copper);
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        h1, h2, h3 {
+            font-family: var(--font-head);
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            line-height: 1.1;
+        }
+
+        p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: rgba(232, 230, 225, 0.8);
+            max-width: 500px;
+        }
+
+        /* REVEAL ANIMATION MASKS */
+        .reveal-text {
+            overflow: hidden;
+            display: block;
+        }
+        .reveal-text span {
+            display: block;
+            transform: translateY(110%);
+            transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .is-in-view .reveal-text span {
+            transform: translateY(0);
+        }
+
+        /* LAYOUT ARCHITECTURE */
+        .wrapper {
+            position: relative;
+            z-index: 2;
+            padding: 4rem;
+        }
+
+        /* VERTICAL HEADLINE */
+        .vertical-nav {
+            position: fixed;
+            left: 3rem;
+            top: 50%;
+            transform: translateY(-50%);
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            transform: translateY(-50%) rotate(180deg);
+            z-index: 10;
+            mix-blend-mode: exclusion;
+        }
+
+        .vertical-nav h1 {
+            font-size: 8vh;
+            white-space: nowrap;
+            color: var(--bone);
+            opacity: 0.9;
+        }
+
+        /* SECTIONS */
+        section {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            position: relative;
+            padding-left: 15vw; /* Offset for vertical nav */
+        }
+
+        .content-block {
+            position: relative;
+        }
+
+        .content-block.right {
+            margin-left: auto;
+            margin-right: 5vw;
+            text-align: right;
+        }
+        
+        .content-block.right p {
+            margin-left: auto;
+        }
+
+        /* IMAGES & OVERLAPS */
+        .img-container {
+            position: absolute;
+            z-index: -1;
+            filter: grayscale(100%) contrast(120%);
+            opacity: 0.6;
+            transition: transform 0.1s linear;
+        }
+        
+        .img-container img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* Specific placements */
+        .img-1 {
+            top: -20%;
+            right: -10%;
+            width: 40vw;
+            mix-blend-mode: lighten;
+        }
+
+        .img-2 {
+            bottom: -10%;
+            left: -20%;
+            width: 35vw;
+            mix-blend-mode: exclusion;
+        }
+
+        /* MAGNETIC ORB CTA */
+        .magnetic-wrap {
+            position: fixed;
+            bottom: 3rem;
+            right: 3rem;
+            z-index: 50;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .orb-cta {
+            width: 80px;
+            height: 80px;
+            background: var(--copper);
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow: hidden;
+            box-shadow: 0 10px 30px -10px rgba(193, 124, 92, 0.4);
+            position: relative;
+        }
+
+        .orb-text {
+            font-family: var(--font-head);
+            font-size: 0.8rem;
+            color: var(--void);
+            font-weight: 700;
+            position: absolute;
+            transition: opacity 0.3s;
+        }
+
+        .orb-form {
+            opacity: 0;
+            display: flex;
+            width: 100%;
+            padding: 0 20px;
+            transform: translateY(20px);
+            transition: all 0.4s 0.1s;
+        }
+
+        .orb-input {
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid var(--void);
+            width: 100%;
+            padding: 10px 0;
+            font-family: var(--font-body);
+            color: var(--void);
+            outline: none;
+            font-size: 0.9rem;
+        }
+
+        .orb-input::placeholder {
+            color: rgba(15, 14, 14, 0.6);
+            text-transform: uppercase;
+            font-size: 0.7rem;
+            letter-spacing: 0.1em;
+        }
+
+        /* Hover State for Orb */
+        .magnetic-wrap:hover .orb-cta {
+            width: 300px;
+            height: 60px;
+            border-radius: 4px;
+            background: var(--bone);
+        }
+
+        .magnetic-wrap:hover .orb-text {
+            opacity: 0;
+        }
+
+        .magnetic-wrap:hover .orb-form {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* MOBILE ADJUSTMENTS */
+        @media (max-width: 768px) {
+            .vertical-nav {
+                display: none;
+            }
+            section {
+                padding-left: 0;
+                justify-content: center;
+            }
+            .content-block {
+                width: 100%;
+            }
+            .img-1, .img-2 {
+                width: 80vw;
+                opacity: 0.3;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- CUSTOM CURSOR -->
+    <div id="cursor"></div>
+
+    <!-- WEBGL BACKGROUND -->
+    <canvas id="webgl-canvas"></canvas>
+
+    <!-- FIXED VERTICAL NAV -->
+    <nav class="vertical-nav">
+        <h1>Valentina Voss</h1>
+    </nav>
+
+    <!-- MAIN CONTENT WRAPPER -->
+    <div class="wrapper">
+        
+        <!-- SECTION 1: ARCHITECTURE -->
+        <section id="architecture">
+            <div class="img-container img-1" data-speed="0.2">
+                <img src="https://images.unsplash.com/photo-1535940026362-7a7181057778?q=80&w=1000&auto=format&fit=crop" alt="Vertebrae Structure">
+            </div>
+            
+            <div class="content-block">
+                <span class="h-sub reveal-text"><span>Methodology</span></span>
+                <div class="reveal-text">
+                    <h2><span>Biological</span></h2>
+                </div>
+                <div class="reveal-text">
+                    <h2><span>Renovation.</span></h2>
+                </div>
+                <br>
+                <div class="reveal-text">
+                    <p><span>
+                        I don't sell exercise. I sell structural integrity. Most trainers break you down; I engineer you to withstand the torque of a high-velocity life. We focus on kinetic alignment, fascial hydration, and metabolic efficiency. If you want to sweat, go to a sauna. If you want to rebuild your chassis, you come here.
+                    </span></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: DESERT LAB -->
+        <section id="lab">
+             <div class="img-container img-2" data-speed="0.1">
+                <img src="https://images.unsplash.com/photo-1486716508215-9430fd396277?q=80&w=1000&auto=format&fit=crop" alt="Abstract Concrete">
+            </div>
+
+            <div class="content-block right">
+                <span class="h-sub reveal-text"><span>Location</span></span>
+                <div class="reveal-text">
+                    <h2><span>Silverleaf</span></h2>
+                </div>
+                <div class="reveal-text">
+                    <h2><span>North.</span></h2>
+                </div>
+                <br>
+                <div class="reveal-text">
+                    <p><span>
+                        A private, clinically sterile facility overlooking the valley. No mirrors. No music. Just biometrics and iron. Privacy is absolute. NDAs are standard protocol.
+                    </span></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: PREREQUISITES -->
+        <section id="prerequisites">
+            <div class="content-block">
+                <span class="h-sub reveal-text"><span>Application</span></span>
+                <div class="reveal-text">
+                    <h2><span>By Referral</span></h2>
+                </div>
+                <div class="reveal-text">
+                    <h2><span>Or Application.</span></h2>
+                </div>
+                <br>
+                <div class="reveal-text">
+                    <p><span>
+                        My roster is capped at 12. Current waitlist: 14 weeks. I require a full blood panel and movement screen before we touch a weight. This is not for tourists.
+                    </span></p>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- MAGNETIC CTA -->
+    <div class="magnetic-wrap" id="magnetic-btn">
+        <div class="orb-cta">
+            <span class="orb-text">VOSS</span>
+            <form class="orb-form" onsubmit="event.preventDefault();">
+                <input type="email" class="orb-input" placeholder="ACCESS CODE / EMAIL" required>
+            </form>
+        </div>
+    </div>
+
+    <!-- SCRIPTS -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js"></script>
+    <script src="https://unpkg.com/gsap@3.12.2/dist/gsap.min.js"></script>
+    <script src="https://unpkg.com/gsap@3.12.2/dist/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.29/bundled/lenis.min.js"></script>
+
+    <script>
+        // --- 1. LENIS SMOOTH SCROLL ---
+        const lenis = new Lenis({
+            duration: 1.2,
+            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+            direction: 'vertical',
+            gestureDirection: 'vertical',
+            smooth: true,
+            mouseMultiplier: 1,
+            smoothTouch: false,
+            touchMultiplier: 2,
+            lerp: 0.05 // Heavy feel
+        });
+
+        function raf(time) {
+            lenis.raf(time);
+            requestAnimationFrame(raf);
+        }
+        requestAnimationFrame(raf);
+
+
+        // --- 2. GSAP REVEALS & PARALLAX ---
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Text Reveals
+        const revealElements = document.querySelectorAll('.reveal-text');
+        revealElements.forEach(el => {
+            ScrollTrigger.create({
+                trigger: el,
+                start: "top 85%",
+                onEnter: () => el.parentElement.classList.add('is-in-view')
+            });
+        });
+
+        // Image Parallax
+        const images = document.querySelectorAll('.img-container');
+        images.forEach(img => {
+            const speed = img.getAttribute('data-speed');
+            gsap.to(img, {
+                y: (i, target) => -100 * speed * ScrollTrigger.maxScroll(window),
+                ease: "none",
+                scrollTrigger: {
+                    trigger: img,
+                    start: "top bottom",
+                    end: "bottom top",
+                    scrub: true
+                }
+            });
+        });
+
+
+        // --- 3. MAGNETIC BUTTON & CURSOR ---
+        const cursor = document.getElementById('cursor');
+        const magBtn = document.getElementById('magnetic-btn');
+        const magStrength = 0.4;
+        
+        let mouseX = 0, mouseY = 0;
+        let btnX = 0, btnY = 0;
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            
+            // Custom Cursor Follow
+            gsap.to(cursor, {
+                x: mouseX,
+                y: mouseY,
+                duration: 0.1,
+                ease: "power2.out"
+            });
+        });
+
+        // Magnetic Pull Logic
+        const btnRect = magBtn.getBoundingClientRect();
+        const btnCenterX = btnRect.left + btnRect.width / 2;
+        const btnCenterY = btnRect.top + btnRect.height / 2;
+
+        magBtn.addEventListener('mousemove', (e) => {
+            const rect = magBtn.getBoundingClientRect();
+            const x = e.clientX - rect.left - rect.width / 2;
+            const y = e.clientY - rect.top - rect.height / 2;
+            
+            gsap.to(magBtn, {
+                x: x * 0.5,
+                y: y * 0.5,
+                duration: 0.3,
+                ease: "power2.out"
+            });
+            
+            gsap.to(cursor, {
+                scale: 3,
+                background: 'var(--bone)',
+                duration: 0.3
+            });
+        });
+
+        magBtn.addEventListener('mouseleave', () => {
+            gsap.to(magBtn, {
+                x: 0,
+                y: 0,
+                duration: 0.8,
+                ease: "elastic.out(1, 0.3)"
+            });
+             gsap.to(cursor, {
+                scale: 1,
+                background: 'var(--copper)',
+                duration: 0.3
+            });
+        });
+
+
+        // --- 4. THREE.JS LIQUID SAND SHADER ---
+        
+        const canvas = document.getElementById('webgl-canvas');
+        
+        // Scene Setup
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
+        camera.position.z = 2; // Top down view essentially
+        camera.position.y = 1;
+        camera.rotation.x = -0.5;
+
+        const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+        // Uniforms
+        const uniforms = {
+            uTime: { value: 0 },
+            uMouse: { value: new THREE.Vector2(0, 0) },
+            uResolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
+            uColor1: { value: new THREE.Color('#C17C5C') }, // Copper
+            uColor2: { value: new THREE.Color('#0F0E0E') }, // Void/Shadow
+            uColor3: { value: new THREE.Color('#353932') }  // Agave
+        };
+
+        // Shaders
+        const vertexShader = `
+            uniform float uTime;
+            uniform vec2 uMouse;
+            varying vec2 vUv;
+            varying float vElevation;
+            varying vec3 vNormal;
+
+            // Simplex Noise Function
+            vec3 permute(vec3 x) { return mod(((x*34.0)+1.0)*x, 289.0); }
+            float snoise(vec2 v){
+                const vec4 C = vec4(0.211324865405187, 0.366025403784439,
+                        -0.577350269189626, 0.024390243902439);
+                vec2 i  = floor(v + dot(v, C.yy) );
+                vec2 x0 = v -   i + dot(i, C.xx);
+                vec2 i1;
+                i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
+                vec4 x12 = x0.xyxy + C.xxzz;
+                x12.xy -= i1;
+                i = mod(i, 289.0);
+                vec3 p = permute( permute( i.y + vec3(0.0, i1.y, 1.0 ))
+                + i.x + vec3(0.0, i1.x, 1.0 ));
+                vec3 m = max(0.5 - vec3(dot(x0,x0), dot(x12.xy,x12.xy), dot(x12.zw,x12.zw)), 0.0);
+                m = m*m ;
+                m = m*m ;
+                vec3 x = 2.0 * fract(p * C.www) - 1.0;
+                vec3 h = abs(x) - 0.5;
+                vec3 ox = floor(x + 0.5);
+                vec3 a0 = x - ox;
+                m *= 1.79284291400159 - 0.85373472095314 * ( a0*a0 + h*h );
+                vec3 g;
+                g.x  = a0.x  * x0.x  + h.x  * x0.y;
+                g.yz = a0.yz * x12.xz + h.yz * x12.yw;
+                return 130.0 * dot(m, g);
+            }
+
+            void main() {
+                vUv = uv;
+                
+                vec3 pos = position;
+
+                // Slow ripple
+                float noiseVal = snoise(uv * 3.0 + uTime * 0.1);
+                
+                // Mouse Interaction (Repulsion)
+                // Map mouse from screen to plane coords approx
+                float dist = distance(uv, uMouse);
+                float ripple = sin(dist * 20.0 - uTime * 2.0) * 0.05;
+                
+                // Displacement
+                float elevation = noiseVal * 0.15;
+                
+                // Mouse dip
+                float mouseEffect = smoothstep(0.4, 0.0, dist) * 0.2;
+                
+                pos.z += elevation - mouseEffect + ripple * smoothstep(0.5, 0.0, dist);
+
+                vElevation = pos.z;
+
+                // Recalculate normal for lighting
+                // Simplified for performance - using elevation to fake it in fragment
+                
+                gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+            }
+        `;
+
+        const fragmentShader = `
+            uniform float uTime;
+            uniform vec3 uColor1;
+            uniform vec3 uColor2;
+            uniform vec3 uColor3;
+            varying vec2 vUv;
+            varying float vElevation;
+
+            void main() {
+                // Fake lighting based on elevation
+                // High points catch light (Copper), Low points are shadow (Void/Agave)
+                
+                float mixStrength = smoothstep(-0.1, 0.2, vElevation);
+                
+                vec3 color = mix(uColor2, uColor1, mixStrength);
+                
+                // Add some grain/sand texture
+                float grain = fract(sin(dot(vUv, vec2(12.9898, 78.233))) * 43758.5453);
+                color += grain * 0.05;
+
+                // Sharp shadows for "Golden Hour" feel
+                float shadow = smoothstep(0.05, 0.0, vElevation) * 0.8;
+                color = mix(color, uColor3, shadow);
+
+                gl_FragColor = vec4(color, 1.0);
+            }
+        `;
+
+        // Geometry
+        const geometry = new THREE.PlaneGeometry(6, 4, 128, 128);
+        const material = new THREE.ShaderMaterial({
+            vertexShader,
+            fragmentShader,
+            uniforms,
+            side: THREE.DoubleSide
+        });
+
+        const plane = new THREE.Mesh(geometry, material);
+        scene.add(plane);
+
+        // Raycaster for accurate mouse on plane
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+        
+        // Mouse Move for WebGL
+        window.addEventListener('mousemove', (e) => {
+            // Normalized device coordinates
+            mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+
+            // Map to UV space (approximation for shader)
+            // Since plane fills view mostly, we map 0-1
+            uniforms.uMouse.value.x = (e.clientX / window.innerWidth);
+            uniforms.uMouse.value.y = 1.0 - (e.clientY / window.innerHeight);
+        });
+
+        // Animation Loop
+        const clock = new THREE.Clock();
+
+        function animate() {
+            const elapsedTime = clock.getElapsedTime();
+            uniforms.uTime.value = elapsedTime;
+
+            // Subtle camera movement
+            camera.position.x = Math.sin(elapsedTime * 0.1) * 0.1;
+            camera.position.y = 1 + Math.cos(elapsedTime * 0.1) * 0.1;
+            camera.lookAt(0, 0, 0);
+
+            renderer.render(scene, camera);
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+
+        // Resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            uniforms.uResolution.value.set(window.innerWidth, window.innerHeight);
+        });
+
+    </script>
+</body>
+</html>
