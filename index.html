@@ -194,7 +194,9 @@
             /* CRITICAL FIX: Prevents alt text leakage */
             font-size: 0; 
             line-height: 0;
-            overflow: hidden; /* Extra safety */
+            color: transparent; /* Extra safety for mobile text flash */
+            user-select: none;
+            overflow: hidden; 
         }
         
         .img-container img {
@@ -346,6 +348,15 @@
 
         /* MOBILE ADJUSTMENTS */
         @media (max-width: 768px) {
+            body { cursor: auto !important; }
+            #cursor { display: none !important; }
+            
+            /* Performance: Remove heavy filters on mobile */
+            .img-container { 
+                filter: none !important; 
+                opacity: 0.8; 
+            }
+
             .vertical-nav { display: none; }
             section { padding-left: 0; justify-content: center; }
             .content-block { width: 100%; }
@@ -473,52 +484,57 @@
     <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.29/bundled/lenis.min.js"></script>
 
     <script>
+        // MOBILE DETECT
+        const isMobile = window.innerWidth < 768;
+
         // --- 1. LENIS SMOOTH SCROLL & TORQUE PHYSICS ---
-        const lenis = new Lenis({
-            duration: 1.2,
-            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-            direction: 'vertical',
-            gestureDirection: 'vertical',
-            smooth: true,
-            mouseMultiplier: 1,
-            smoothTouch: false,
-            touchMultiplier: 2,
-            lerp: 0.05
-        });
+        let lenis;
+        
+        // Disable Lenis on Mobile to preserve native scroll inertia
+        if (!isMobile) {
+            lenis = new Lenis({
+                duration: 1.2,
+                easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+                direction: 'vertical',
+                gestureDirection: 'vertical',
+                smooth: true,
+                mouseMultiplier: 1,
+                smoothTouch: false,
+                touchMultiplier: 2,
+                lerp: 0.05
+            });
+        }
 
         // TORQUE VARIABLES
         let currentSkew = 0;
         const wrapper = document.querySelector('.wrapper');
-        const skewStrength = 0.15; // Intensity of the lean
-        const skewDamping = 0.1;   // How fast it returns to normal
+        const skewStrength = 0.15; 
+        const skewDamping = 0.1;   
 
         function raf(time) {
-            lenis.raf(time);
-            
-            // TORQUE LOGIC: Calculate Skew based on Velocity
-            if (wrapper) {
-                // Get target skew from velocity
-                // Clamp it to avoid breaking layout (-5 to 5 degrees)
-                let targetSkew = lenis.velocity * skewStrength;
-                targetSkew = Math.min(Math.max(targetSkew, -5), 5);
+            if (lenis) {
+                lenis.raf(time);
                 
-                // Linear Interpolation (Lerp) for smoothness
-                currentSkew += (targetSkew - currentSkew) * skewDamping;
-                
-                // Apply Transform
-                // We use skewY to simulate the "drag" or G-force
-                wrapper.style.transform = `skewY(${currentSkew}deg)`;
+                // TORQUE LOGIC: Only run on desktop
+                if (wrapper) {
+                    let targetSkew = lenis.velocity * skewStrength;
+                    targetSkew = Math.min(Math.max(targetSkew, -5), 5);
+                    currentSkew += (targetSkew - currentSkew) * skewDamping;
+                    wrapper.style.transform = `skewY(${currentSkew}deg)`;
+                }
             }
-
             requestAnimationFrame(raf);
         }
-        requestAnimationFrame(raf);
+        
+        // Start RAF only if we need it (Desktop)
+        if (!isMobile) {
+            requestAnimationFrame(raf);
+        }
 
 
         // --- 2. GSAP REVEALS & PARALLAX ---
         gsap.registerPlugin(ScrollTrigger);
 
-        // Text Reveals
         const revealElements = document.querySelectorAll('.reveal-text');
         revealElements.forEach(el => {
             ScrollTrigger.create({
@@ -528,7 +544,6 @@
             });
         });
 
-        // Image Parallax
         const images = document.querySelectorAll('.img-container');
         images.forEach(img => {
             const speed = img.getAttribute('data-speed');
@@ -546,57 +561,59 @@
 
 
         // --- 3. MAGNETIC BUTTON & CURSOR ---
-        const cursor = document.getElementById('cursor');
+        // Only initialize Custom Cursor Logic on Desktop
         const magBtn = document.getElementById('magnetic-btn');
-        
-        let mouseX = 0, mouseY = 0;
 
-        document.addEventListener('mousemove', (e) => {
-            mouseX = e.clientX;
-            mouseY = e.clientY;
-            
-            gsap.to(cursor, {
-                x: mouseX,
-                y: mouseY,
-                duration: 0.1,
-                ease: "power2.out"
-            });
-        });
+        if (!isMobile) {
+            const cursor = document.getElementById('cursor');
+            let mouseX = 0, mouseY = 0;
 
-        const btnRect = magBtn.getBoundingClientRect();
-        
-        magBtn.addEventListener('mousemove', (e) => {
-            const rect = magBtn.getBoundingClientRect();
-            const x = e.clientX - rect.left - rect.width / 2;
-            const y = e.clientY - rect.top - rect.height / 2;
-            
-            gsap.to(magBtn, {
-                x: x * 0.5,
-                y: y * 0.5,
-                duration: 0.3,
-                ease: "power2.out"
+            document.addEventListener('mousemove', (e) => {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+                
+                gsap.to(cursor, {
+                    x: mouseX,
+                    y: mouseY,
+                    duration: 0.1,
+                    ease: "power2.out"
+                });
             });
-            
-            gsap.to(cursor, {
-                scale: 3,
-                background: 'var(--bone)',
-                duration: 0.3
-            });
-        });
 
-        magBtn.addEventListener('mouseleave', () => {
-            gsap.to(magBtn, {
-                x: 0,
-                y: 0,
-                duration: 0.8,
-                ease: "elastic.out(1, 0.3)"
+            // Magnetic Logic
+            magBtn.addEventListener('mousemove', (e) => {
+                const rect = magBtn.getBoundingClientRect();
+                const x = e.clientX - rect.left - rect.width / 2;
+                const y = e.clientY - rect.top - rect.height / 2;
+                
+                gsap.to(magBtn, {
+                    x: x * 0.5,
+                    y: y * 0.5,
+                    duration: 0.3,
+                    ease: "power2.out"
+                });
+                
+                gsap.to(cursor, {
+                    scale: 3,
+                    background: 'var(--bone)',
+                    duration: 0.3
+                });
             });
-             gsap.to(cursor, {
-                scale: 1,
-                background: 'var(--copper)',
-                duration: 0.3
+
+            magBtn.addEventListener('mouseleave', () => {
+                gsap.to(magBtn, {
+                    x: 0,
+                    y: 0,
+                    duration: 0.8,
+                    ease: "elastic.out(1, 0.3)"
+                });
+                 gsap.to(cursor, {
+                    scale: 1,
+                    background: 'var(--copper)',
+                    duration: 0.3
+                });
             });
-        });
+        }
 
 
         // --- 4. THREE.JS LIQUID SAND SHADER ---
@@ -607,9 +624,10 @@
         camera.position.y = 1;
         camera.rotation.x = -0.5;
 
-        const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true });
+        // OPTIMIZATION: Cap Pixel Ratio at 1 for Mobile to prevent throttling
+        const renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: !isMobile });
         renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.setPixelRatio(isMobile ? 1 : Math.min(window.devicePixelRatio, 2));
 
         const uniforms = {
             uTime: { value: 0 },
@@ -684,7 +702,10 @@
             }
         `;
 
-        const geometry = new THREE.PlaneGeometry(6, 4, 128, 128);
+        // OPTIMIZATION: Reduce segments significantly on mobile (128 -> 32)
+        const segmentCount = isMobile ? 32 : 128;
+        const geometry = new THREE.PlaneGeometry(6, 4, segmentCount, segmentCount);
+        
         const material = new THREE.ShaderMaterial({
             vertexShader,
             fragmentShader,
@@ -716,10 +737,13 @@
         animate();
 
         window.addEventListener('resize', () => {
+            // Re-check mobile state on resize (e.g. tablet rotation)
+            const newIsMobile = window.innerWidth < 768;
+            
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.setPixelRatio(newIsMobile ? 1 : Math.min(window.devicePixelRatio, 2));
             uniforms.uResolution.value.set(window.innerWidth, window.innerHeight);
         });
 
