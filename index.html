@@ -3,8 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VALENTINA VOSS | BIOLOGICAL RENOVATION</title>
     
+    <!-- SEO & METADATA -->
+    <title>VALENTINA VOSS | BIOLOGICAL RENOVATION</title>
+    <meta name="description" content="Structural integrity for high-velocity lives. Biological renovation, kinetic alignment, and metabolic efficiency. Private facility in Silverleaf.">
+    <meta name="keywords" content="Valentina Voss, Biological Renovation, Personal Training, Silverleaf, Kinetic Alignment, Structural Integrity">
+    <meta name="theme-color" content="#0F0E0E">
+
+    <!-- OPEN GRAPH / SOCIAL -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="VALENTINA VOSS | BIOLOGICAL RENOVATION">
+    <meta property="og:description" content="I don't sell exercise. I sell structural integrity.">
+    <meta property="og:image" content="https://images.unsplash.com/photo-1535940026362-7a7181057778?q=80&w=1000&auto=format&fit=crop">
+
     <!-- FONTS -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -41,8 +52,17 @@
             font-family: var(--font-body);
             overflow-x: hidden;
             -webkit-font-smoothing: antialiased;
-            cursor: none; /* Custom cursor handling */
+            cursor: none; 
         }
+
+        /* LAYERS (Z-INDEX LOGIC)
+           -10: WebGL / Void
+           -1:  Images
+           1:   Content Wrapper
+           20:  Nav / HUD
+           50:  Interactions (Buttons)
+           9999: Cursor
+        */
 
         /* CUSTOM CURSOR */
         #cursor {
@@ -67,11 +87,11 @@
             left: 0;
             width: 100vw;
             height: 100vh;
-            z-index: -1;
-            opacity: 0.6; /* Slight fade to let text pop */
+            z-index: -10;
+            opacity: 0.6; 
         }
 
-        /* TYPOGRAPHY UTILS */
+        /* TYPOGRAPHY */
         .h-sub {
             font-family: var(--font-body);
             font-size: 0.85rem;
@@ -97,7 +117,7 @@
             max-width: 500px;
         }
 
-        /* REVEAL ANIMATION MASKS */
+        /* ANIMATION UTILS */
         .reveal-text {
             overflow: hidden;
             display: block;
@@ -114,8 +134,11 @@
         /* LAYOUT ARCHITECTURE */
         .wrapper {
             position: relative;
-            z-index: 2;
+            z-index: 1;
             padding: 4rem;
+            will-change: transform; /* Performance Hint for Torque Effect */
+            transform-origin: center center;
+            padding-bottom: 0; /* Let footer handle spacing */
         }
 
         /* VERTICAL HEADLINE */
@@ -127,7 +150,7 @@
             writing-mode: vertical-rl;
             text-orientation: mixed;
             transform: translateY(-50%) rotate(180deg);
-            z-index: 10;
+            z-index: 20;
             mix-blend-mode: exclusion;
         }
 
@@ -144,7 +167,7 @@
             display: flex;
             align-items: center;
             position: relative;
-            padding-left: 15vw; /* Offset for vertical nav */
+            padding-left: 15vw; 
         }
 
         .content-block {
@@ -168,6 +191,10 @@
             filter: grayscale(100%) contrast(120%);
             opacity: 0.6;
             transition: transform 0.1s linear;
+            /* CRITICAL FIX: Prevents alt text leakage */
+            font-size: 0; 
+            line-height: 0;
+            overflow: hidden; /* Extra safety */
         }
         
         .img-container img {
@@ -176,7 +203,6 @@
             display: block;
         }
 
-        /* Specific placements */
         .img-1 {
             top: -20%;
             right: -10%;
@@ -190,6 +216,53 @@
             width: 35vw;
             mix-blend-mode: exclusion;
         }
+
+        /* FOOTER */
+        .site-footer {
+            margin-top: 10vh;
+            padding: 3rem 0 2rem 15vw; /* Match section padding */
+            border-top: 1px solid rgba(232, 230, 225, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            font-family: var(--font-body);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: rgba(232, 230, 225, 0.4);
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .footer-links a {
+            color: inherit;
+            text-decoration: none;
+            position: relative;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background: var(--copper);
+            transition: width 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--copper);
+        }
+
+        .footer-links a:hover::after {
+            width: 100%;
+        }
+
 
         /* MAGNETIC ORB CTA */
         .magnetic-wrap {
@@ -273,19 +346,17 @@
 
         /* MOBILE ADJUSTMENTS */
         @media (max-width: 768px) {
-            .vertical-nav {
-                display: none;
-            }
-            section {
+            .vertical-nav { display: none; }
+            section { padding-left: 0; justify-content: center; }
+            .content-block { width: 100%; }
+            .img-1, .img-2 { width: 80vw; opacity: 0.3; }
+            .site-footer {
                 padding-left: 0;
-                justify-content: center;
-            }
-            .content-block {
-                width: 100%;
-            }
-            .img-1, .img-2 {
-                width: 80vw;
-                opacity: 0.3;
+                flex-direction: column-reverse;
+                align-items: center;
+                gap: 1.5rem;
+                padding-bottom: 8rem; /* Space for magnetic btn */
+                text-align: center;
             }
         }
     </style>
@@ -304,12 +375,12 @@
     </nav>
 
     <!-- MAIN CONTENT WRAPPER -->
-    <div class="wrapper">
+    <main class="wrapper">
         
         <!-- SECTION 1: ARCHITECTURE -->
         <section id="architecture">
             <div class="img-container img-1" data-speed="0.2">
-                <img src="https://images.unsplash.com/photo-1535940026362-7a7181057778?q=80&w=1000&auto=format&fit=crop" alt="Vertebrae Structure">
+                <img src="https://images.unsplash.com/photo-1535940026362-7a7181057778?q=80&w=1000&auto=format&fit=crop" alt="Abstract Concrete Structure" loading="eager">
             </div>
             
             <div class="content-block">
@@ -332,7 +403,7 @@
         <!-- SECTION 2: DESERT LAB -->
         <section id="lab">
              <div class="img-container img-2" data-speed="0.1">
-                <img src="https://images.unsplash.com/photo-1486716508215-9430fd396277?q=80&w=1000&auto=format&fit=crop" alt="Abstract Concrete">
+                <img src="https://images.unsplash.com/photo-1486716508215-9430fd396277?q=80&w=1000&auto=format&fit=crop" alt="Silverleaf Desert Laboratory" loading="lazy">
             </div>
 
             <div class="content-block right">
@@ -371,7 +442,19 @@
             </div>
         </section>
 
-    </div>
+        <!-- FOOTER -->
+        <footer class="site-footer">
+            <div class="footer-copy">
+                &copy; 2024 VOSS BIOLOGICAL. ALL RIGHTS RESERVED.
+            </div>
+            <div class="footer-links">
+                <a href="#">Legal</a>
+                <a href="#">Instagram</a>
+                <a href="#">Contact</a>
+            </div>
+        </footer>
+
+    </main>
 
     <!-- MAGNETIC CTA -->
     <div class="magnetic-wrap" id="magnetic-btn">
@@ -390,7 +473,7 @@
     <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.29/bundled/lenis.min.js"></script>
 
     <script>
-        // --- 1. LENIS SMOOTH SCROLL ---
+        // --- 1. LENIS SMOOTH SCROLL & TORQUE PHYSICS ---
         const lenis = new Lenis({
             duration: 1.2,
             easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
@@ -400,11 +483,33 @@
             mouseMultiplier: 1,
             smoothTouch: false,
             touchMultiplier: 2,
-            lerp: 0.05 // Heavy feel
+            lerp: 0.05
         });
+
+        // TORQUE VARIABLES
+        let currentSkew = 0;
+        const wrapper = document.querySelector('.wrapper');
+        const skewStrength = 0.15; // Intensity of the lean
+        const skewDamping = 0.1;   // How fast it returns to normal
 
         function raf(time) {
             lenis.raf(time);
+            
+            // TORQUE LOGIC: Calculate Skew based on Velocity
+            if (wrapper) {
+                // Get target skew from velocity
+                // Clamp it to avoid breaking layout (-5 to 5 degrees)
+                let targetSkew = lenis.velocity * skewStrength;
+                targetSkew = Math.min(Math.max(targetSkew, -5), 5);
+                
+                // Linear Interpolation (Lerp) for smoothness
+                currentSkew += (targetSkew - currentSkew) * skewDamping;
+                
+                // Apply Transform
+                // We use skewY to simulate the "drag" or G-force
+                wrapper.style.transform = `skewY(${currentSkew}deg)`;
+            }
+
             requestAnimationFrame(raf);
         }
         requestAnimationFrame(raf);
@@ -443,16 +548,13 @@
         // --- 3. MAGNETIC BUTTON & CURSOR ---
         const cursor = document.getElementById('cursor');
         const magBtn = document.getElementById('magnetic-btn');
-        const magStrength = 0.4;
         
         let mouseX = 0, mouseY = 0;
-        let btnX = 0, btnY = 0;
 
         document.addEventListener('mousemove', (e) => {
             mouseX = e.clientX;
             mouseY = e.clientY;
             
-            // Custom Cursor Follow
             gsap.to(cursor, {
                 x: mouseX,
                 y: mouseY,
@@ -461,11 +563,8 @@
             });
         });
 
-        // Magnetic Pull Logic
         const btnRect = magBtn.getBoundingClientRect();
-        const btnCenterX = btnRect.left + btnRect.width / 2;
-        const btnCenterY = btnRect.top + btnRect.height / 2;
-
+        
         magBtn.addEventListener('mousemove', (e) => {
             const rect = magBtn.getBoundingClientRect();
             const x = e.clientX - rect.left - rect.width / 2;
@@ -501,13 +600,10 @@
 
 
         // --- 4. THREE.JS LIQUID SAND SHADER ---
-        
         const canvas = document.getElementById('webgl-canvas');
-        
-        // Scene Setup
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
-        camera.position.z = 2; // Top down view essentially
+        camera.position.z = 2;
         camera.position.y = 1;
         camera.rotation.x = -0.5;
 
@@ -515,29 +611,24 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-        // Uniforms
         const uniforms = {
             uTime: { value: 0 },
             uMouse: { value: new THREE.Vector2(0, 0) },
             uResolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
-            uColor1: { value: new THREE.Color('#C17C5C') }, // Copper
-            uColor2: { value: new THREE.Color('#0F0E0E') }, // Void/Shadow
-            uColor3: { value: new THREE.Color('#353932') }  // Agave
+            uColor1: { value: new THREE.Color('#C17C5C') },
+            uColor2: { value: new THREE.Color('#0F0E0E') },
+            uColor3: { value: new THREE.Color('#353932') }
         };
 
-        // Shaders
         const vertexShader = `
             uniform float uTime;
             uniform vec2 uMouse;
             varying vec2 vUv;
             varying float vElevation;
-            varying vec3 vNormal;
 
-            // Simplex Noise Function
             vec3 permute(vec3 x) { return mod(((x*34.0)+1.0)*x, 289.0); }
             float snoise(vec2 v){
-                const vec4 C = vec4(0.211324865405187, 0.366025403784439,
-                        -0.577350269189626, 0.024390243902439);
+                const vec4 C = vec4(0.211324865405187, 0.366025403784439, -0.577350269189626, 0.024390243902439);
                 vec2 i  = floor(v + dot(v, C.yy) );
                 vec2 x0 = v -   i + dot(i, C.xx);
                 vec2 i1;
@@ -545,8 +636,7 @@
                 vec4 x12 = x0.xyxy + C.xxzz;
                 x12.xy -= i1;
                 i = mod(i, 289.0);
-                vec3 p = permute( permute( i.y + vec3(0.0, i1.y, 1.0 ))
-                + i.x + vec3(0.0, i1.x, 1.0 ));
+                vec3 p = permute( permute( i.y + vec3(0.0, i1.y, 1.0 )) + i.x + vec3(0.0, i1.x, 1.0 ));
                 vec3 m = max(0.5 - vec3(dot(x0,x0), dot(x12.xy,x12.xy), dot(x12.zw,x12.zw)), 0.0);
                 m = m*m ;
                 m = m*m ;
@@ -563,30 +653,14 @@
 
             void main() {
                 vUv = uv;
-                
                 vec3 pos = position;
-
-                // Slow ripple
                 float noiseVal = snoise(uv * 3.0 + uTime * 0.1);
-                
-                // Mouse Interaction (Repulsion)
-                // Map mouse from screen to plane coords approx
                 float dist = distance(uv, uMouse);
                 float ripple = sin(dist * 20.0 - uTime * 2.0) * 0.05;
-                
-                // Displacement
                 float elevation = noiseVal * 0.15;
-                
-                // Mouse dip
                 float mouseEffect = smoothstep(0.4, 0.0, dist) * 0.2;
-                
                 pos.z += elevation - mouseEffect + ripple * smoothstep(0.5, 0.0, dist);
-
                 vElevation = pos.z;
-
-                // Recalculate normal for lighting
-                // Simplified for performance - using elevation to fake it in fragment
-                
                 gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
             }
         `;
@@ -600,26 +674,16 @@
             varying float vElevation;
 
             void main() {
-                // Fake lighting based on elevation
-                // High points catch light (Copper), Low points are shadow (Void/Agave)
-                
                 float mixStrength = smoothstep(-0.1, 0.2, vElevation);
-                
                 vec3 color = mix(uColor2, uColor1, mixStrength);
-                
-                // Add some grain/sand texture
                 float grain = fract(sin(dot(vUv, vec2(12.9898, 78.233))) * 43758.5453);
                 color += grain * 0.05;
-
-                // Sharp shadows for "Golden Hour" feel
                 float shadow = smoothstep(0.05, 0.0, vElevation) * 0.8;
                 color = mix(color, uColor3, shadow);
-
                 gl_FragColor = vec4(color, 1.0);
             }
         `;
 
-        // Geometry
         const geometry = new THREE.PlaneGeometry(6, 4, 128, 128);
         const material = new THREE.ShaderMaterial({
             vertexShader,
@@ -631,41 +695,26 @@
         const plane = new THREE.Mesh(geometry, material);
         scene.add(plane);
 
-        // Raycaster for accurate mouse on plane
-        const raycaster = new THREE.Raycaster();
         const mouse = new THREE.Vector2();
-        
-        // Mouse Move for WebGL
         window.addEventListener('mousemove', (e) => {
-            // Normalized device coordinates
             mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
             mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
-
-            // Map to UV space (approximation for shader)
-            // Since plane fills view mostly, we map 0-1
             uniforms.uMouse.value.x = (e.clientX / window.innerWidth);
             uniforms.uMouse.value.y = 1.0 - (e.clientY / window.innerHeight);
         });
 
-        // Animation Loop
         const clock = new THREE.Clock();
-
         function animate() {
             const elapsedTime = clock.getElapsedTime();
             uniforms.uTime.value = elapsedTime;
-
-            // Subtle camera movement
             camera.position.x = Math.sin(elapsedTime * 0.1) * 0.1;
             camera.position.y = 1 + Math.cos(elapsedTime * 0.1) * 0.1;
             camera.lookAt(0, 0, 0);
-
             renderer.render(scene, camera);
             requestAnimationFrame(animate);
         }
-
         animate();
 
-        // Resize
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
